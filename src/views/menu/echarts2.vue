@@ -9,17 +9,6 @@
                       @change="initChart"
                       placeholder="选择年">
       </el-date-picker>
-      <el-select v-model="selKindList"
-                 size="mini"
-                 @change="initChart"
-                 style="margin-left:10px"
-                 placeholder="请选择">
-        <el-option v-for="item in xmList"
-                   :key="item.eid"
-                   :label="item.entryName"
-                   :value="item.eid">
-        </el-option>
-      </el-select>
     </el-card>
     <el-card class="box-card my-box-chart"
              style="margin-top:10px">
@@ -36,18 +25,18 @@ import echarts from "echarts";
 import moment from "moment";
 import { mapGetters } from "vuex";
 import { theme } from "@/plugins/macarons";
+import { accAdd } from "@/common/math.js";
+
 echarts.registerTheme("NJCB", theme);
 export default {
   data() {
     return {
       loadChartOne: false,
-      dateYear: "",
-      xmList: [],
-      selKindList: ""
+      dateYear: ""
     };
   },
   computed: {
-    ...mapGetters("user", ["getRoleInfo", "getUserInfo"])
+    ...mapGetters("user", ["getRoleInfo"])
   },
   created() {
     if (this.pandun(400)) {
@@ -65,28 +54,59 @@ export default {
         return flag;
       }
     },
-    async getXm() {
-      let parm = this.pandun(104)
-        ? { entryName: "" }
-        : { entryName: "", userId: this.getUserInfo.userId };
-      const result = await this.$api.xmMgrGetAllTable(this, {
-        searchInfo: parm
+    getXm() {
+      let arr = [
+        "findTurnoverEchart",
+        "findProfitsEchart",
+        "findOutputsEchart",
+        "findljEchart",
+        "findXmInfoYearEchart"
+      ];
+      let param = `year=${this.dateYear}`;
+      let promise = [];
+      arr.forEach(item => {
+        promise.push(this.$api[item](this, param));
       });
-      this.xmList = result.result;
-      if (this.xmList.length) {
-        this.selKindList = this.xmList[0].eid;
-      }
-      this.initAllChart();
+      let data = {
+        turnover: 0,
+        profit: 0,
+        output: 0,
+        lj: 0
+      };
+      let data2 = {
+        turnover: [0, 0],
+        profit: [0, 0],
+        output: [0, 0],
+        lj: [0, 0]
+      };
+      Promise.all(promise).then(res => {
+        res.forEach((item, index) => {
+          if (index < 4) {
+            let arr = item.result;
+            arr.forEach(i => {
+              let num = i.monthOutPut || 0;
+              data[item.type] = accAdd(data[item.type], num);
+            });
+          } else {
+            let resIndex = res[4].result;
+            resIndex.forEach(item => {
+              let num1 = item.yearPlan || 0;
+              let num2 = item.yearIndex || 0;
+              data2[item.type][0] = accAdd(data2[item.type][0], num1);
+              data2[item.type][1] = accAdd(data2[item.type][1], num2);
+            });
+          }
+        });
+        this.loadChartOne = true;
+        let myChart1 = echarts.init(
+          document.getElementById("chart-one"),
+          "NJCB"
+        );
+        myChart1.setOption(this.getHUizhiData(data, data2));
+        this.loadChartOne = false;
+      });
     },
-    async getChartOne() {
-      this.loadChartOne = true;
-      let param = `eid=${this.selKindList}&year=${this.dateYear}`;
-      const data = await this.$api.getEchartOne(this, param);
-      let myChart1 = echarts.init(document.getElementById("chart-one"), "NJCB");
-      myChart1.setOption(this.getHUizhiData(data.result));
-      this.loadChartOne = false;
-    },
-    getHUizhiData(data) {
+    getHUizhiData(data, data2) {
       let option = {
         title: {
           text: "年度产值、营业额、利润分析",
@@ -103,24 +123,15 @@ export default {
         dataset: {
           source: [
             ["product", "公司下发完成", "年度计划完成", "年度实际完成"],
-            [
-              "产值",
-              data[0]["yearIndex"],
-              data[0]["yearPlan"],
-              data[0]["monthAll"]
-            ],
+            ["产值", data["output"], data2["output"][0], data2["output"][1]],
             [
               "营业额",
-              data[1]["yearIndex"],
-              data[1]["yearPlan"],
-              data[1]["monthAll"]
+              data["turnover"],
+              data2["turnover"][0],
+              data2["turnover"][1]
             ],
-            [
-              "利润",
-              data[2]["yearIndex"],
-              data[2]["yearPlan"],
-              data[2]["monthAll"]
-            ]
+            ["利润", data["profit"], data2["profit"][0], data2["profit"][1]],
+            ["两金", data["lj"], data2["lj"][0], data2["lj"][1]]
           ],
           label: {
             show: true,
@@ -158,7 +169,8 @@ export default {
       return option;
     },
     initChart() {
-      this.getChartOne();
+      this.getXm();
+      // this.getChartOne();
     },
     initAllChart() {
       this.getChartOne();
