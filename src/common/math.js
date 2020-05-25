@@ -14,3 +14,9 @@ export const accAdd = (arg1, arg2) => {
     m = Math.pow(10, Math.max(r1, r2));
     return (arg1 * m + arg2 * m) / m;
 };
+
+
+
+export const accRound = (n, decimals = 0) => {
+    return Number(`${Math.round(`${n}e${decimals}`)}e-${decimals}`);
+};

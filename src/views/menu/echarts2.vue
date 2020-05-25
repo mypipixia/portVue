@@ -21,7 +21,7 @@
         </el-option>
       </el-select>
     </el-card>
-    <el-card class="box-card"
+    <el-card class="box-card my-box-chart"
              style="margin-top:10px">
       <div id="chart-one"
            v-loading="loadChartOne"
@@ -169,9 +169,14 @@ export default {
 
 <style lang="scss" scoped>
 .echarts {
+  height: 100%;
   .echarts-card {
     padding: 10px;
     background-color: white;
+  }
+  .my-box-chart {
+    height: calc(100% - 85px);
+    overflow: auto;
   }
 }
 </style>

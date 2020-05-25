@@ -3,14 +3,15 @@
            :default-active='getSelDropList'
            @select="select">
 
-    <el-submenu v-if="pandun(400)">
+    <el-submenu v-if="pandun(400)"
+                index="1">
       <template slot="title">
         <i class="el-icon-location"></i>
         <span>图表</span>
       </template>
-      <el-menu-item index="/index/echarts"><i class="el-icon-s-management"></i>图表A</el-menu-item>
-      <el-menu-item index="/index/echarts2"><i class="el-icon-s-management"></i>图表B</el-menu-item>
-      <el-menu-item index="/index/echarts3"><i class="el-icon-s-management"></i>图表C</el-menu-item>
+      <el-menu-item index="/index/echarts"><i class="fa fa-line-chart icon"></i>图表A</el-menu-item>
+      <el-menu-item index="/index/echarts3"><i class="fa fa-area-chart icon"></i>图表B</el-menu-item>
+      <el-menu-item index="/index/echarts2"><i class="fa fa-bar-chart icon"></i>图表C</el-menu-item>
     </el-submenu>
     <el-menu-item index="/index/xmMgr"
                   v-if="getRoleInfo == '*'"><i class="el-icon-s-management"></i>项目管理</el-menu-item>
@@ -64,5 +65,11 @@ export default {
   &:active {
     background-color: white;
   }
+}
+</style>
+<style lang="scss" scoped>
+.icon {
+  display: inline-block;
+  margin-right: 8px;
 }
 </style>

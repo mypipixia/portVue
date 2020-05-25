@@ -155,7 +155,7 @@ import {
 import FileSaver from "file-saver";
 import XLSX from "xlsx";
 import { outPutTable } from "@/common/table";
-import { accAdd } from "@/common/math.js";
+import { accAdd, accRound } from "@/common/math.js";
 import infoDio from "./pubilc/infoDio";
 import _ from "lodash";
 import moment from "moment";
@@ -546,6 +546,9 @@ export default {
           }
         });
         item.kgOutPut = kgOutPut;
+        if (item.yearPlan) {
+          item.bf = accRound(item.yearOutPut / item.yearPlan, 4) * 100 + "%";
+        }
       });
     },
     seach() {
