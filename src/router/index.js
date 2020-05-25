@@ -52,6 +52,10 @@ const routes = [
         component: () => import('@/views/menu/profit.vue'),
       },
       {
+        path: '/index/lj',
+        component: () => import('@/views/menu/lj.vue'),
+      },
+      {
         path: '/index/echarts',
         component: () => import('@/views/menu/echarts.vue'),
       },

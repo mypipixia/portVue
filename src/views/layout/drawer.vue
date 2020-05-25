@@ -22,6 +22,8 @@
                   v-if="pandun(200)"><i class="el-icon-s-data"></i>营业额</el-menu-item>
     <el-menu-item index="/index/profit"
                   v-if="pandun(300)"><i class="el-icon-s-data"></i>利润管理</el-menu-item>
+    <el-menu-item index="/index/lj"
+                  v-if="pandun(500)"><i class="el-icon-s-data"></i>两金</el-menu-item>
     <el-menu-item index="/index/role"
                   v-if="getRoleInfo == '*'"><i class="el-icon-s-check"></i>权限管理</el-menu-item>
     <el-menu-item index="/index/user"

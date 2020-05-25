@@ -246,6 +246,29 @@ export default {
             label: "公司下发下季度利润",
             required: false
           }
+        },
+        lj: {
+          jd: {
+            type: "select",
+            label: "季度",
+            optionsKey: {
+              label: "label",
+              value: "label"
+            },
+            disabled: false,
+            options: JD_ARR,
+            required: true
+          },
+          jdNext: {
+            type: "input",
+            label: "下季度计划两金",
+            required: false
+          },
+          jdLower: {
+            type: "input",
+            label: "公司下发下季度两金",
+            required: false
+          }
         }
       },
       jdGridData: {
@@ -293,6 +316,20 @@ export default {
           },
           {
             label: "公司下发下季度利润",
+            prop: "jdLower"
+          }
+        ],
+        lj: [
+          {
+            label: "季度",
+            prop: "jd"
+          },
+          {
+            label: "下季度计划两金",
+            prop: "jdNext"
+          },
+          {
+            label: "公司下发下季度两金",
             prop: "jdLower"
           }
         ]
@@ -375,6 +412,30 @@ export default {
             required: false,
             ruleType: "num"
           }
+        },
+        lj: {
+          year: {
+            type: "date",
+            label: "年度",
+            required: true,
+            prop: {
+              valueFormat: "yyyy",
+              type: "year",
+              disabled: false
+            }
+          },
+          yearPlan: {
+            type: "input",
+            label: "本年度计划两金",
+            required: true,
+            ruleType: "num"
+          },
+          yearIndex: {
+            type: "input",
+            label: "公司下发本年两金",
+            required: false,
+            ruleType: "num"
+          }
         }
       },
       GridData: {
@@ -452,6 +513,24 @@ export default {
             prop: "yearIndex",
             width: "220px",
             label: "公司下发本年利润"
+          }
+        ],
+        lj: [
+          {
+            prop: "year",
+            width: "100px",
+            label: "年度",
+            sortable: true
+          },
+          {
+            prop: "yearPlan",
+            width: "150px",
+            label: "本年度计划两金"
+          },
+          {
+            prop: "yearIndex",
+            width: "220px",
+            label: "公司下发本年两金"
           }
         ]
       },
