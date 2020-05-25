@@ -2,8 +2,16 @@
   <el-menu class="el-menu-vertical-demo"
            :default-active='getSelDropList'
            @select="select">
-    <el-menu-item index="/index/echarts"
-                  v-if="pandun(400)"><i class="el-icon-s-management"></i>图表</el-menu-item>
+
+    <el-submenu v-if="pandun(400)">
+      <template slot="title">
+        <i class="el-icon-location"></i>
+        <span>图表</span>
+      </template>
+      <el-menu-item index="/index/echarts"><i class="el-icon-s-management"></i>图表A</el-menu-item>
+      <el-menu-item index="/index/echarts2"><i class="el-icon-s-management"></i>图表B</el-menu-item>
+      <el-menu-item index="/index/echarts3"><i class="el-icon-s-management"></i>图表C</el-menu-item>
+    </el-submenu>
     <el-menu-item index="/index/xmMgr"
                   v-if="getRoleInfo == '*'"><i class="el-icon-s-management"></i>项目管理</el-menu-item>
     <el-menu-item index="/index/xUser"

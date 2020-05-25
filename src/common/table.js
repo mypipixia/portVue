@@ -140,6 +140,11 @@ export const outPutTable = [
     width: '150',
     label: '开工累计完成产值',
   },
+  {
+    prop: 'bf',
+    width: '150',
+    label: '完成比例',
+  },
 ];
 
 //营业额
@@ -244,6 +249,11 @@ export const turnTable = [
     width: '150',
     label: '开工累计完成营业额',
   },
+  {
+    prop: 'bf',
+    width: '150',
+    label: '完成比例',
+  },
 ];
 
 //利润
@@ -336,5 +346,10 @@ export const proTable = [
     prop: 'kgOutPut',
     width: '150',
     label: '开工累计完成利润',
+  },
+  {
+    prop: 'bf',
+    width: '150',
+    label: '完成比例',
   },
 ];

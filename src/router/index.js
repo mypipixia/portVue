@@ -55,6 +55,14 @@ const routes = [
         path: '/index/echarts',
         component: () => import('@/views/menu/echarts.vue'),
       },
+      {
+        path: '/index/echarts2',
+        component: () => import('@/views/menu/echarts2.vue'),
+      },
+      {
+        path: '/index/echarts3',
+        component: () => import('@/views/menu/echarts3.vue'),
+      },
     ],
   },
 ];
