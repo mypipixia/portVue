@@ -6,6 +6,9 @@ until.until(api, 'findProfitsEchart', 'echarts/findProfits', 'get');
 until.until(api, 'findOutputsEchart', 'echarts/findOutputs', 'get');
 until.until(api, 'findljEchart', 'echarts/findlj', 'get');
 until.until(api, 'findXmInfoYearEchart', 'echarts/findXmInfoYear', 'get');
+until.until(api, 'findEchartJd', 'echarts/findEchartJd', 'get');
+until.until(api, 'findEchartInfoJd', 'echarts/findEchartInfoJd', 'get');
+
 
 
 

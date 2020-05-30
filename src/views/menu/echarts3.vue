@@ -9,23 +9,22 @@
                       @change="initChart"
                       placeholder="选择年">
       </el-date-picker>
-      <el-select v-model="selKindList"
-                 size="mini"
-                 @change="initChart"
-                 style="margin-left:10px"
-                 placeholder="请选择">
-        <el-option v-for="item in xmList"
-                   :key="item.eid"
-                   :label="item.entryName"
-                   :value="item.eid">
-        </el-option>
-      </el-select>
     </el-card>
     <el-card class="box-card my-box-chart"
              style="margin-top:10px">
-      <div id="chart-one"
-           v-loading="loadChartOne"
-           style="width:100%;height:500px"></div>
+      <div ref="chart0"
+           class="chart"
+           v-loading="loadChart[0]"></div>
+      <div ref="chart1"
+           class="chart"
+           v-loading="loadChart[1]"></div>
+      <div ref="chart2"
+           class="chart"
+           v-loading="loadChart[2]"></div>
+      <div ref="chart3"
+           class="chart"
+           v-loading="loadChart[3]"></div>
+
     </el-card>
 
   </div>
@@ -35,28 +34,82 @@
 import echarts from "echarts";
 import moment from "moment";
 import { mapGetters } from "vuex";
+import { JD_ARRs } from "@/common/consts";
+import { accAdd } from "@/common/math.js";
 import { theme } from "@/plugins/macarons";
 echarts.registerTheme("NJCB", theme);
 export default {
   data() {
     return {
-      loadChartOne: false,
       dateYear: "",
-      xmList: [],
-      selKindList: ""
+      loadChart: [false, false, false, false]
     };
   },
   computed: {
-    ...mapGetters("user", ["getRoleInfo", "getUserInfo"])
+    ...mapGetters("user", ["getRoleInfo"])
   },
   created() {
     if (this.pandun(400)) {
       let now = new Date().getTime();
       this.dateYear = moment(now).format("YYYY");
-      this.getXm();
+      this.getChart();
     }
   },
   methods: {
+    getChartInfo(index, item) {
+      let param = `year=${this.dateYear}&table=${item.key}`;
+      let param2 = `year=${this.dateYear}&table=${item.key + "s"}`;
+      this.loadChart[index] = true;
+      Promise.all([
+        this.$api.findEchartJd(this, param2),
+        this.$api.findEchartInfoJd(this, param)
+      ]).then(res => {
+        let sjData = res[0].result;
+        let data = [0, 0, 0, 0, 0];
+        sjData.forEach(item => {
+          let index = JD_ARRs[item.jd];
+          data[index] = accAdd(data[index], item.monthOutPut);
+        });
+
+        let jdInfo = res[1].result;
+        let jdLower = {};
+        let jdNext = {};
+        let jdArr = [0, "03", "06", "09", 12];
+        jdInfo.forEach(item => {
+          let key = item.year + "-" + jdArr[JD_ARRs[item.jd]];
+          let num = jdLower[key] || 0;
+          jdLower[key] = accAdd(num, item.jdLower);
+          let num2 = jdNext[key] || 0;
+          jdNext[key] = accAdd(num2, item.jdNext);
+        });
+        let option = this.setOption(item.label, jdLower, jdNext, data);
+        this.initChart(index, option);
+      });
+    },
+    getChart() {
+      let type = [
+        {
+          label: "产值",
+          key: "output"
+        },
+        {
+          label: "营业额",
+          key: "turnover"
+        },
+        {
+          label: "利润",
+          key: "profit"
+        },
+        {
+          label: "两金",
+          key: "lj"
+        }
+      ];
+
+      type.forEach((item, index) => {
+        this.getChartInfo(index, item);
+      });
+    },
     pandun(v) {
       if (this.getRoleInfo == "*") {
         return true;
@@ -65,103 +118,82 @@ export default {
         return flag;
       }
     },
-    async getXm() {
-      let parm = this.pandun(104)
-        ? { entryName: "" }
-        : { entryName: "", userId: this.getUserInfo.userId };
-      const result = await this.$api.xmMgrGetAllTable(this, {
-        searchInfo: parm
-      });
-      this.xmList = result.result;
-      if (this.xmList.length) {
-        this.selKindList = this.xmList[0].eid;
-      }
-      this.initAllChart();
-    },
-    async getChartOne() {
-      this.loadChartOne = true;
-      let param = `eid=${this.selKindList}&year=${this.dateYear}`;
-      const data = await this.$api.getEchartOne(this, param);
-      let myChart1 = echarts.init(document.getElementById("chart-one"), "NJCB");
-      myChart1.setOption(this.getHUizhiData(data.result));
-      this.loadChartOne = false;
-    },
-    getHUizhiData(data) {
+    setOption(label, jdLower, jdNext, data) {
+      let jdArr = ["03", "06", "09", 12];
+      let jdIndex1 = this.dateYear - 1 + "-" + jdArr[3];
+      let jdIndex2 = this.dateYear + "-" + jdArr[0];
+      let jdIndex3 = this.dateYear + "-" + jdArr[1];
+      let jdIndex4 = this.dateYear + "-" + jdArr[2];
       let option = {
         title: {
-          text: "年度产值、营业额、利润分析",
+          text: `${label}分析表`,
           subtext: ""
         },
+        tooltip: {
+          trigger: "axis",
+          axisPointer: {
+            type: "cross",
+            crossStyle: {
+              color: "#999"
+            }
+          }
+        },
         toolbox: {
-          show: true,
           feature: {
             saveAsImage: { show: true }
           }
         },
-        legend: {},
-        tooltip: {},
-        dataset: {
-          source: [
-            ["product", "公司下发完成", "年度计划完成", "年度实际完成"],
-            [
-              "产值",
-              data[0]["yearIndex"],
-              data[0]["yearPlan"],
-              data[0]["monthAll"]
-            ],
-            [
-              "营业额",
-              data[1]["yearIndex"],
-              data[1]["yearPlan"],
-              data[1]["monthAll"]
-            ],
-            [
-              "利润",
-              data[2]["yearIndex"],
-              data[2]["yearPlan"],
-              data[2]["monthAll"]
-            ]
-          ],
-          label: {
-            show: true,
-            position: "top"
-          }
+        legend: {
+          data: [`公司计划${label}`, `事业部计划${label}`, `事业部实际${label}`]
         },
-        xAxis: { type: "category" },
-        yAxis: {},
-        // Declare several bar series, each will be mapped
-        // to a column of dataset.source by default.
+        xAxis: [
+          {
+            type: "category",
+            data: ["第一季度", "第二季度", "第三季度", "第四季度"],
+            axisPointer: {
+              type: "shadow"
+            }
+          }
+        ],
+        yAxis: [
+          {
+            type: "value"
+          }
+        ],
         series: [
           {
+            name: `公司计划${label}`,
             type: "bar",
-            label: {
-              show: true,
-              position: "top"
-            }
+            data: [
+              jdLower[jdIndex1] || 0,
+              jdLower[jdIndex2] || 0,
+              jdLower[jdIndex3] || 0,
+              jdLower[jdIndex4] || 0
+            ]
           },
           {
+            name: `事业部计划${label}`,
             type: "bar",
-            label: {
-              show: true,
-              position: "top"
-            }
+            data: [
+              jdNext[jdIndex1] || 0,
+              jdNext[jdIndex2] || 0,
+              jdNext[jdIndex3] || 0,
+              jdNext[jdIndex4] || 0
+            ]
           },
           {
-            type: "bar",
-            label: {
-              show: true,
-              position: "top"
-            }
+            name: `事业部实际${label}`,
+            type: "line",
+            data: [data[1], data[2], data[3], data[4]]
           }
         ]
       };
       return option;
     },
-    initChart() {
-      this.getChartOne();
-    },
-    initAllChart() {
-      this.getChartOne();
+    initChart(index, option) {
+      let myChart1 = echarts.init(this.$refs["chart" + index], "NJCB");
+      myChart1.setOption(option);
+      this.loadChart[index] = true;
     }
   }
 };
@@ -177,6 +209,11 @@ export default {
   .my-box-chart {
     height: calc(100% - 85px);
     overflow: auto;
+    .chart {
+      width: 50%;
+      height: 400px;
+      float: left;
+    }
   }
 }
 </style>
