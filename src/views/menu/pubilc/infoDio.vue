@@ -602,6 +602,7 @@ export default {
       let param = {
         ...this.jdGridData,
         id: this.jdId,
+        eid: this.defaultEid || this.selEid,
         infoId: this.infoId
       };
       try {
