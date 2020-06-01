@@ -11,9 +11,5 @@
 }
 </style>
 <script>
-export default {
-  mounted() {
-    console.log("页面加载完毕");
-  }
-};
+export default {};
 </script>
