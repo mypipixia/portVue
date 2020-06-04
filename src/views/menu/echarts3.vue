@@ -6,7 +6,7 @@
                       type="year"
                       size="mini"
                       value-format="yyyy"
-                      @change="initChart"
+                      @change="getChart"
                       placeholder="选择年">
       </el-date-picker>
     </el-card>
